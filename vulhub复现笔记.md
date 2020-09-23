@@ -35,10 +35,105 @@ MSF
 use mysql_authbypass_hashdump
 ```
 
-**受影响的版本：**
+**受影响的mysql版本：**
 
 - MariaDB versions from 5.1.62, 5.2.12, 5.3.6, 5.5.23 are not
 - MySQL versions from 5.1.63, 5.5.24, 5.6.6 are not.
+
+
+
+# nginx
+
+## CVE-2013-4547
+
+**漏洞成因：**
+
+主要原因是错误地解析了请求的URI
+
+```nginx.conf
+location ~ \.php$ {
+    include        fastcgi_params;
+
+    fastcgi_pass   127.0.0.1:9000;
+    fastcgi_index  index.php;
+    fastcgi_param  SCRIPT_FILENAME  /var/www/html$fastcgi_script_name;
+    fastcgi_param  DOCUMENT_ROOT /var/www/html;
+}
+```
+
+正常情况下（关闭pathinfo的情况下），Nginx匹配到.php结尾的请求，就发送给fastcgi进行解。而存在CVE-2013-4547的情况下，我们请求 `1.gif[0x20][0x00].php` ，这个URI可以匹配上正则 `.php$`，可以进入这个location块；但进入后，由于fastcgi在查找文件时**被`\0`截断**，Nginx却错**误地认为**请求的文件是`1.gif[0x20]`，就设置其为SCRIPT_FILENAME的值发送给fastcgi。fastcgi根据SCRIPT_FILENAME的值进行解析，最后造成了解析漏洞。
+
+所以，我们只需要上传一个空格结尾的文件，即可使PHP解析。
+
+漏洞可导致目录跨越及代码执行
+
+**利用方式：**
+
+构造文件nginx.jpg上传
+
+```php
+<?php phpinfo();?>
+```
+
+构造URI
+
+```URL
+http://193.112.81.168:8080/uploadfiles/nginx.jpg  .php
+```
+
+抓包，后面两个空格\[0x20][0x20]--->\[0x20][0x00]，空格不需要URL编码
+
+发包发现php已解析成功
+
+**受影响的版本：**
+
+- Nginx 0.8.41 ~ 1.4.3 / 1.5.0 ~ 1.5.7
+
+
+
+## CVE-2017-7529
+
+**漏洞成因：**
+
+对请求头中Range头处理不当造成。Nginx在反向代理站点的时候，通常会将一些文件进行缓存，特别是静态文件。缓存的部分存储在文件中，每个缓存文件包括`“文件头”+“HTTP返回包头”+“HTTP返回包体”`。如果**二次请求命中了该缓存文件**，则Nginx会直接将该文件中的“HTTP返回包体”返回给用户。如果我们的请求中包含Range头，Nginx将会根据我指定的start和end位置，返回指定长度的内容。而如果我构造了两个负的位置，如(-600,  -9223372036854774591)，将可能读取到负位置的数据。如果这次请求又命中了缓存文件，则可能就可以读取到缓存文件中位于“HTTP返回包体”前的“文件头”、“HTTP返回包头”等内容。当Nginx服务器使用代理缓存的情况下，攻击者通过利用该漏洞可以拿到服务器的后端真实IP。
+
+**利用方式：**
+
+```python 
+python3 poc.py ip
+```
+
+**受影响的版本：**
+
+- Nginx 0.5.6 - 1.13.2
+
+
+
+## insecure-configuration
+
+**漏洞成因：**
+
+nginx错误配置导致的漏洞
+
+### CRLF注入
+
+
+
+**利用方式：**
+
+
+
+
+
+
+
+
+
+
+
+**受影响的版本：**
+
+
 
 
 
@@ -163,9 +258,11 @@ checkPageValidity函数有五个if判断
 
 5. 经过urldecode函数解码后的$_page在$whitelist中则返回true
 
-> 将$page参数url解码后再以问号分隔取出前面的值再判断，该漏洞就是出现在urldecode()这个函数中，我们可以通过**url二次编码**绕过。上一个判断不能绕过百名版的原因就是`?`的缘故，这里用url编码的方式对问号进行编码，这样PHP就不知道这是个问号，就当成了target的值。
+> 将$page参数url解码后再以问号分隔取出前面的值再判断，该漏洞就是出现在urldecode()这个函数中，我们可以通过**url二次编码**绕过。上一个判断不能绕过白名单的原因就是`?`的缘故，这里用url编码的方式对问号进行编码，这样PHP就不知道这是个问号，就当成了target的值。
+>
+> 浏览器自动URL解码一次，urlcode函数再将$page解码后就是`index.php?target=db_sql.php?/../../../../../etc/passwd` 再以?分割取出来前面的字符串为index.php，$whitelist中有index.php所以会进入最后一个if区间return true
 
-综上，可以构造payload : `target=db_sql.php%253f/../../../../../etc/passwd`
+综上，可以构造payload : `index.php?target=db_sql.php%253f/../../../../../etc/passwd`
 
 直接读取到了账户信息
 
@@ -254,7 +351,7 @@ action=test&configuration=O:10:"PMA_Config":1:{s:6:"source";s:19:"../../../etc/p
 
 # redis
 
-## Redis 4.x/5.x 未授权访问漏洞
+## Redis 4.x/5.x 未授权访问
 
 **漏洞成因：**
 
@@ -323,3 +420,64 @@ save
 
 - 4.x
 - 5.x
+
+
+
+# struts2
+
+## s2-001
+
+**漏洞成因：**
+
+
+
+
+
+
+
+**利用方式一：**
+
+
+
+
+
+
+
+**受影响的版本：**
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+
+##
+
+**漏洞成因：**
+
+
+
+
+
+
+
+**利用方式一：**
+
+
+
+
+
+
+
+**受影响的版本：**
+
+
+
