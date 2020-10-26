@@ -12,7 +12,7 @@ mysql 5.0版本以上会创建日志文件，全局变量genernal_log控制日�
 
 ```SQL
 show variables like 'general%';	//查看日志状态
-show variables like 'secure_file_priv'	//查看是否有写权限
+show variables like 'secure_file_priv';	//查看是否有写权限
 select @@datadir;	//获取网站的绝对路径
 set global general_log = "ON";
 set global general_log_file='C:/phpstudy/WWW/shell.php';

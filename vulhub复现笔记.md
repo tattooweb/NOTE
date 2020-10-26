@@ -278,7 +278,7 @@ checkPageValidity函数有五个if判断
 1. 利用phpinfo()查看session文件存放路径，搜索save_path
 2. 执行sql语句，生成一句话木马
 3. 在cookie中找到session
-4. 包含session文件，``http://193.112.81.168:8080/index.php?target=db_datadict.php%253f/../../../../../../save_path/sess_yoursession`，连接木马
+4. 包含session文件，`http://193.112.81.168:8080/index.php?target=db_datadict.php%253f/../../../../../../save_path/sess_yoursession`，连接木马
 
 **受影响的phpmyadmin版本：**
 

